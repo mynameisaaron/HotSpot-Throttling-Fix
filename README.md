@@ -1,22 +1,38 @@
 # Windows Mobile Hotspot TTL Fix
 
-**Project:** Bypass carrier mobile hotspot throttling by adjusting IP packet TTL (Time To Live)
 
-This solution makes tethered laptop traffic appear as native phone traffic to the carrier's network, dramatically improving bandwidth when using your phone's personal hotspot.
+
+
+
+
+
+## **The Goal:**
+Use your phone's mobile internet connection (tethered as a hotspot) to your laptop
+To have your labtop connectivity when on the road.
+
 
 ## Problem
-Many carriers (T-Mobile, Verizon, AT&T, Visible, etc.) detect and throttle hotspot/tethered connections using TTL inspection and other fingerprinting methods. Direct phone speeds are fast, but laptop via hotspot becomes unusable.
+U.S. Mobile Carriers generally rate among the most expensive places worldwide for mobile internet service.
+Despspite the cost, they throttle the consumers traffic when tethering/hotspot connecting their labtops.
+
+## The throttling implementation by inspecting each IPv4 packet's Time To Live Field 
+In the TCP/IP protocol that we all use everyday, every file is chopped into Packets 1500 bytes in size.  This packet payload it Has a 20 byte header added to the front of the payload so the router knows what to do with it.  
+In the TCP/IP protocl, each packet has a value called 'Time to Live' with a default value of 64, with each hop between routers, the TTL is decremented by 1.  This exists to prevent an endless loop situation that can plauge a network.
+
+In our situation, the Mobile Carrier is counting the TTL number of each packet to determine if this is coming direclty from the phone, or, if it has already hopped once from the phone to your labtop. i.e. if the TTL value has been decremented by 2 (hopped twice), the carrier know that you've teathered a device.
 
 ## Solution
-Change the default hop limit (TTL) on Windows from 128 to 65 so that after the phone decrements it by 1, it matches typical phone traffic.
+Change the default hop limit (TTL) on Windows from 64 to 65 so that after the phone decrements it by 1, it matches typical phone traffic.
 
-## Features
-- One-click automated fix via startup Batch file
-- Easy on/off scripts
-- Verified with `netsh` commands
-- Works across restarts
+## Try this out (the temporary fix)
+open windows powershell, and put this in:
 
-## Installation (Automatic on Boot)
+```cmd
+netsh int ipv4 set glob defaultcurhoplimit=65
+```
+
+
+## Installation (the Long term fix)
 
 1. Copy `TTL_Hotspot_Fix.bat` to your Windows Startup folder:
    - Press `Win + R`, type `shell:startup`, press Enter
@@ -24,42 +40,7 @@ Change the default hop limit (TTL) on Windows from 128 to 65 so that after the p
 
 2. Reboot
 
-## Files
-
-- **`TTL_Hotspot_Fix.bat`** – Applies TTL=65 on startup
-- **`TTL_Reset.bat`** – Restores default TTL=128
-- `README.md` – This documentation
-
-## Usage
-
-**Manual Apply (Admin Command Prompt):**
-```cmd
-netsh int ipv4 set glob defaultcurhoplimit=65
-netsh int ipv6 set glob defaultcurhoplimit=65
-```
-
-**Verification:**
-```cmd
-netsh int ipv4 show global | findstr Hop
-```
-
-**Reset:**
-```cmd
-netsh int ipv4 set glob defaultcurhoplimit=128
-netsh int ipv6 set glob defaultcurhoplimit=128
-```
-
-## Screenshots / Results
-*(Add your before/after speed test screenshots here)*
-
-## Technologies
-- Windows Networking (`netsh`)
-- Batch Scripting
-- IP Packet Manipulation (TTL/Hop Limit)
-
----
-
-**Made with ❤️ for Solutions Engineering & Field Productivity**
+3. Now enjoy your labtop on the road.
 
 ## License
 MIT License - feel free to use and modify.
